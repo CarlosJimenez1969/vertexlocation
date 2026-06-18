@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background-color: #0a0e1a;
+  color: #e5edff;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Scrollbar oscura */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0e1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e3a6b;
+  border-radius: 8px;
+}
+
+/* Ajustes Leaflet en tema oscuro */
+.leaflet-container {
+  background: #0a0e1a;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #0f1626;
+  color: #e5edff;
+  border: 1px solid #1e3a6b;
+}
+
+@layer components {
+  .vx-card {
+    @apply bg-vx-surface border border-vx-border rounded-2xl;
+  }
+  .vx-btn {
+    @apply bg-vx-blue hover:bg-vx-blueLight text-white font-semibold rounded-xl px-4 py-2 transition-colors;
+  }
+  .vx-input {
+    @apply w-full bg-vx-bg border border-vx-border rounded-xl px-3 py-2 text-sm
+           text-white placeholder-vx-muted focus:outline-none focus:border-vx-blue;
+  }
+  /* Barra de avance indeterminada (mientras se guarda) */
+  .vx-progress {
+    @apply relative h-1 w-full overflow-hidden rounded-full bg-vx-border;
+  }
+  .vx-progress > span {
+    @apply absolute inset-y-0 left-0 w-2/5 rounded-full bg-vx-blue;
+    animation: vx-progress-slide 1s ease-in-out infinite;
+  }
+}
+
+@keyframes vx-progress-slide {
+  0%   { left: -40%; width: 40%; }
+  50%  { left: 30%;  width: 50%; }
+  100% { left: 100%; width: 40%; }
+}

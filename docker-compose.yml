@@ -1,0 +1,107 @@
+# =====================================================================
+#  VertexMascota — Orquestación de servicios
+#  PostgreSQL · Redis · Backend FastAPI · Celery worker · Celery beat · Traccar
+# =====================================================================
+version: "3.9"
+
+services:
+  # --------- Base de datos ---------
+  db:
+    image: postgres:16-alpine
+    container_name: vx_postgres
+    environment:
+      POSTGRES_DB: vertexmascota
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - vx_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --------- Redis (broker de Celery) ---------
+  redis:
+    image: redis:7-alpine
+    container_name: vx_redis
+    ports:
+      - "6379:6379"
+
+  # --------- Traccar (plataforma GPS, puerto JT808 5015) ---------
+  traccar:
+    image: traccar/traccar:latest
+    container_name: vx_traccar
+    ports:
+      - "8082:8082"     # panel web + API REST
+      - "5015:5015"     # puerto del protocolo JT808 (collar C059)
+      - "5015:5015/udp"
+    volumes:
+      - vx_traccar_data:/opt/traccar/data
+      - vx_traccar_logs:/opt/traccar/logs
+    restart: unless-stopped
+
+  # --------- Backend FastAPI ---------
+  backend:
+    build: ./backend
+    container_name: vx_backend
+    env_file:
+      - ./backend/.env
+    environment:
+      POSTGRES_HOST: db
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/vertexmascota
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      TRACCAR_URL: http://traccar:8082
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      traccar:
+        condition: service_started
+    volumes:
+      - vx_uploads:/app/uploads
+
+  # --------- Celery worker ---------
+  celery_worker:
+    build: ./backend
+    container_name: vx_celery_worker
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    env_file:
+      - ./backend/.env
+    environment:
+      POSTGRES_HOST: db
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/vertexmascota
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      TRACCAR_URL: http://traccar:8082
+    depends_on:
+      - backend
+      - redis
+
+  # --------- Celery beat (tareas programadas) ---------
+  celery_beat:
+    build: ./backend
+    container_name: vx_celery_beat
+    command: celery -A app.tasks.celery_app beat --loglevel=info
+    env_file:
+      - ./backend/.env
+    environment:
+      POSTGRES_HOST: db
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/vertexmascota
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    depends_on:
+      - celery_worker
+
+volumes:
+  vx_pgdata:
+  vx_uploads:
+  vx_traccar_data:
+  vx_traccar_logs:

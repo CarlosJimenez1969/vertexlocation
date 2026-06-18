@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "VertexLocation",
+    "slug": "vertexmascota",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0A0E1A",
+    "splash": {
+      "backgroundColor": "#0A0E1A",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vertexmascota.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Para mostrar la ubicación de tus mascotas y vehículos en el mapa."
+      }
+    },
+    "android": {
+      "package": "com.vertexmascota.app",
+      "permissions": ["ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "config": {
+        "googleMaps": { "apiKey": "TU_GOOGLE_MAPS_API_KEY" }
+      }
+    }
+  }
+}

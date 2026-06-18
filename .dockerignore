@@ -1,0 +1,23 @@
+# No copiar al contexto de build (se reconstruye dentro de la imagen)
+**/node_modules
+**/.venv
+venv/
+env/
+**/__pycache__
+**/*.pyc
+**/dist
+**/build
+
+# Secretos y datos locales
+**/.env
+!**/.env.example
+backend/uploads/
+*.log
+
+# Git / editor / móvil (no se despliega)
+.git
+.github
+.vscode
+.idea
+mobile/
+*.md

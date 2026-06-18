@@ -1,0 +1,39 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# --- Entornos / secretos ---
+.env
+*.env
+!.env.example
+
+# --- Node ---
+node_modules/
+dist/
+build/
+.expo/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# --- Uploads / generados ---
+backend/uploads/
+*.pdf
+
+# --- Editor / SO ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build del frontend (se genera en Docker)
+backend/frontend_dist/
+
+# Config local de Claude Code
+.claude/
