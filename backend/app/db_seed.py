@@ -32,19 +32,21 @@ def seed_plans(db: Session) -> None:
 
 
 def seed_admin(db: Session) -> None:
-    """Crea (o asegura) el usuario administrador inicial a partir de las
-    variables ADMIN_EMAIL / ADMIN_PASSWORD. Idempotente: no pisa la
-    contraseña si el usuario ya existe."""
+    """Crea/asegura el usuario administrador a partir de ADMIN_EMAIL /
+    ADMIN_PASSWORD. La variable de entorno es la FUENTE DE VERDAD: en cada
+    arranque garantiza rol admin, cuenta activa y la contraseña indicada.
+    (Para dejar de restablecerla, basta con quitar ADMIN_PASSWORD del entorno.)"""
     email = (settings.ADMIN_EMAIL or "").strip().lower()
     if not email or not settings.ADMIN_PASSWORD:
+        print("[seed] ADMIN_EMAIL/ADMIN_PASSWORD no definidos; se omite el admin.")
         return
     user = db.scalar(select(User).where(User.email == email))
     if user:
-        # Asegura que tenga rol admin y esté activo, sin tocar su contraseña.
-        if user.rol != "admin" or not user.activo:
-            user.rol = "admin"
-            user.activo = True
-            db.commit()
+        user.rol = "admin"
+        user.activo = True
+        user.password_hash = hash_password(settings.ADMIN_PASSWORD)
+        db.commit()
+        print(f"[seed] Admin asegurado (rol + contraseña restablecida): {email}")
         return
     db.add(User(
         nombre=settings.ADMIN_NAME or "Administrador",
