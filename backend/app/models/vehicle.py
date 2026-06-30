@@ -38,6 +38,8 @@ class Vehicle(Base):
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
     # Límite de velocidad (km/h); None = sin monitoreo de velocidad.
     limite_velocidad: Mapped[int | None] = mapped_column(Integer)
+    # Odómetro actual (km) — lo actualiza el usuario; base de los mantenimientos por km.
+    km_actual: Mapped[int | None] = mapped_column(Integer)
     # --- Modo estacionado/armado (anti-robo) ---
     armado: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     armado_en: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

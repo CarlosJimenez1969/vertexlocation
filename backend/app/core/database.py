@@ -32,8 +32,21 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def init_db() -> None:
-    """Crea todas las tablas (para desarrollo; en prod usar Alembic)."""
+    """Crea todas las tablas y aplica migraciones ligeras idempotentes."""
     # Importa los modelos para que se registren en la metadata
     from app import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+
+    # Migraciones ligeras: columnas agregadas a tablas existentes (create_all
+    # NO altera tablas ya creadas). Son idempotentes (ADD COLUMN IF NOT EXISTS).
+    from sqlalchemy import text
+    _light_migrations = [
+        "ALTER TABLE vehiculos ADD COLUMN IF NOT EXISTS km_actual INTEGER",
+    ]
+    with engine.begin() as conn:
+        for sql in _light_migrations:
+            try:
+                conn.execute(text(sql))
+            except Exception as e:  # no romper el arranque por una migración
+                print(f"[init_db] migración ligera omitida: {e}")

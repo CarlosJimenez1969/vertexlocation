@@ -37,6 +37,7 @@ class VehicleUpdate(BaseModel):
     tipo_combustible: str | None = None
     limite_velocidad: int | None = Field(default=None, ge=0, le=300)
     tiene_inmovilizador: bool | None = None
+    km_actual: int | None = Field(default=None, ge=0)
     foto_url: str | None = None
     dispositivo_id: uuid.UUID | None = None
 
@@ -54,6 +55,7 @@ class VehicleOut(BaseModel):
     tipo_combustible: str | None
     limite_velocidad: int | None
     tiene_inmovilizador: bool
+    km_actual: int | None
     motor_cortado: bool
     foto_url: str | None
     dispositivo_id: uuid.UUID | None

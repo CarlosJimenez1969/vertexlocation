@@ -145,3 +145,11 @@ export const shareApi = {
   revoke: (id) => api.delete(`/share/${id}`),
   getPublic: (token) => api.get(`/share/${token}`),
 };
+
+export const maintenanceApi = {
+  list: (vehiculoId) => api.get(`/maintenance?vehiculo_id=${vehiculoId}`),
+  create: (data) => api.post('/maintenance', data),
+  update: (id, data) => api.patch(`/maintenance/${id}`, data),
+  done: (id) => api.post(`/maintenance/${id}/done`),
+  remove: (id) => api.delete(`/maintenance/${id}`),
+};

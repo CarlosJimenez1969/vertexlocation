@@ -12,6 +12,7 @@ from app.models.report import VetReport
 from app.models.password_reset import PasswordReset
 from app.models.vehicle import Vehicle
 from app.models.share_link import ShareLink
+from app.models.maintenance import Maintenance
 
 __all__ = [
     "User",
@@ -28,4 +29,5 @@ __all__ = [
     "PasswordReset",
     "Vehicle",
     "ShareLink",
+    "Maintenance",
 ]

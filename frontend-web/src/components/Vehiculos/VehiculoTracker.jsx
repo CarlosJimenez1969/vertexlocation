@@ -3,6 +3,7 @@ import PetMap from '../Map/PetMap';
 import { vehiclesApi, geofencesApi } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import CompartirUbicacion from '../Compartir/CompartirUbicacion';
+import MantenimientosPanel from '../Mantenimiento/MantenimientosPanel';
 
 const EMOJI = { auto: '🚗', camioneta: '🛻', moto: '🏍️', otro: '🚙' };
 
@@ -14,6 +15,7 @@ export default function VehiculoTracker({ vehiculo, lastMessage, onBack }) {
   const { isAdmin } = useAuth();
   const limitEditable = isAdmin; // el límite de velocidad lo fija el admin
   const [veh, setVeh] = useState(vehiculo);
+  const [vista, setVista] = useState('mapa'); // mapa | mant
   const [position, setPosition] = useState(null);
   const [route, setRoute] = useState([]);
   const [info, setInfo] = useState(null);
@@ -246,36 +248,54 @@ export default function VehiculoTracker({ vehiculo, lastMessage, onBack }) {
         </div>
       </div>
 
-      {/* Zona segura (geocerca anti-robo) */}
-      <div className="flex items-center justify-between mb-2 text-xs">
-        <span className="text-vx-muted">
-          {geocercas.length > 0
-            ? `🛟 Zona segura activa (radio ${geocercas[0].radio_m} m) — te avisamos si el vehículo sale`
-            : 'Sin zona segura definida'}
-        </span>
-        {geocercas.length > 0 ? (
-          <button onClick={quitarZonas} disabled={geoBusy} className="text-vx-danger hover:underline">
-            🗑️ Quitar zona
-          </button>
-        ) : (
-          <button
-            onClick={crearZona} disabled={geoBusy || !position}
-            className="text-vx-blueLight hover:text-vx-blue font-semibold disabled:opacity-50"
-            title={!position ? 'Se necesita una posición del vehículo' : ''}
-          >
-            🛟 Crear zona segura aquí (300 m)
-          </button>
-        )}
+      {/* Toggle Mapa / Mantenimientos */}
+      <div className="flex gap-1 mb-2">
+        <button onClick={() => setVista('mapa')}
+          className={`text-xs px-3 py-1.5 rounded-lg ${vista === 'mapa' ? 'bg-vx-surface text-white border border-vx-blue' : 'text-vx-muted hover:text-white'}`}>
+          🗺️ Mapa
+        </button>
+        <button onClick={() => setVista('mant')}
+          className={`text-xs px-3 py-1.5 rounded-lg ${vista === 'mant' ? 'bg-vx-surface text-white border border-vx-blue' : 'text-vx-muted hover:text-white'}`}>
+          🔧 Mantenimientos
+        </button>
       </div>
 
+      {/* Zona segura (geocerca anti-robo) — solo en vista de mapa */}
+      {vista === 'mapa' && (
+        <div className="flex items-center justify-between mb-2 text-xs">
+          <span className="text-vx-muted">
+            {geocercas.length > 0
+              ? `🛟 Zona segura activa (radio ${geocercas[0].radio_m} m) — te avisamos si el vehículo sale`
+              : 'Sin zona segura definida'}
+          </span>
+          {geocercas.length > 0 ? (
+            <button onClick={quitarZonas} disabled={geoBusy} className="text-vx-danger hover:underline">
+              🗑️ Quitar zona
+            </button>
+          ) : (
+            <button
+              onClick={crearZona} disabled={geoBusy || !position}
+              className="text-vx-blueLight hover:text-vx-blue font-semibold disabled:opacity-50"
+              title={!position ? 'Se necesita una posición del vehículo' : ''}
+            >
+              🛟 Crear zona segura aquí (300 m)
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="flex-1 min-h-0">
-        <PetMap
-          position={position}
-          route={route}
-          geofences={geocercas}
-          petName={veh.alias}
-          markerEmoji={EMOJI[veh.tipo] || '🚗'}
-        />
+        {vista === 'mapa' ? (
+          <PetMap
+            position={position}
+            route={route}
+            geofences={geocercas}
+            petName={veh.alias}
+            markerEmoji={EMOJI[veh.tipo] || '🚗'}
+          />
+        ) : (
+          <MantenimientosPanel vehiculo={veh} onVehUpdate={setVeh} />
+        )}
       </div>
     </div>
   );
