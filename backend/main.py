@@ -24,7 +24,7 @@ from app.core.database import SessionLocal, init_db
 from app.db_seed import seed_plans, seed_admin
 
 # Routers REST
-from app.api.routes import auth, pets, positions, geofences, mood, alerts, reports, vehicles, devices, admin
+from app.api.routes import auth, pets, positions, geofences, mood, alerts, reports, vehicles, devices, admin, share
 # WebSocket
 from app.realtime.ws_routes import router as ws_router
 from app.realtime.traccar_bridge import run_bridge
@@ -98,6 +98,7 @@ app.include_router(reports.router, prefix=P)
 app.include_router(vehicles.router, prefix=P)
 app.include_router(devices.router, prefix=P)
 app.include_router(admin.router, prefix=P)
+app.include_router(share.router, prefix=P)
 
 # WebSocket (sin prefijo de API; ruta /ws)
 app.include_router(ws_router)

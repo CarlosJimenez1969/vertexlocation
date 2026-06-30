@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import PetMap from '../Map/PetMap';
 import { vehiclesApi, geofencesApi } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
+import CompartirUbicacion from '../Compartir/CompartirUbicacion';
 
 const EMOJI = { auto: '🚗', camioneta: '🛻', moto: '🏍️', otro: '🚙' };
 
@@ -165,6 +166,7 @@ export default function VehiculoTracker({ vehiculo, lastMessage, onBack }) {
           </p>
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
+          <CompartirUbicacion tipo="vehiculo" targetId={veh.id} disabled={!veh.dispositivo_id} />
           <button
             onClick={toggleArmado}
             disabled={armBusy || !veh.dispositivo_id}

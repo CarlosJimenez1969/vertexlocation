@@ -1,0 +1,88 @@
+# /opt/vertexjd/docker-compose.yml
+# Stack VertexJD en el VPS: Caddy + PostgreSQL + VertexLocation + Traccar.
+name: vertexjd
+
+services:
+  # ---- Reverse proxy con HTTPS automático ----
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [vertexlocation]
+
+  # ---- Base de datos compartida (una base por app) ----
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      VXL_DB_PASSWORD: ${VXL_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- VertexLocation (FastAPI + React) ----
+  vertexlocation:
+    build:
+      context: ./vertexlocation        # git clone del repo aquí
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://vertexlocation:${VXL_DB_PASSWORD}@db:5432/vertexlocation
+      ENV: production
+      DEBUG: "false"
+      TRACCAR_ENABLED: "true"
+      TRACCAR_URL: http://traccar:8082
+      TRACCAR_WS_URL: ws://traccar:8082/api/socket
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_NAME: ${ADMIN_NAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "587"
+      SMTP_TLS: "true"
+      SMTP_USER: ${SMTP_USER}
+      SMTP_FROM: ${SMTP_FROM}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      FRONTEND_URL: https://location.vertexjd.com
+      CORS_ORIGINS: https://location.vertexjd.com
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ---- Traccar (GPS: recibe los collares por TCP 5015) ----
+  traccar:
+    image: traccar/traccar:latest
+    restart: unless-stopped
+    ports:
+      - "5015:5015"
+      - "5015:5015/udp"
+    volumes:
+      - traccar_data:/opt/traccar/data
+      - traccar_logs:/opt/traccar/logs
+
+  # ---- (Futuro) VertexSalud — Django ----
+  # vertexsalud:
+  #   build: ./vertexsalud
+  #   restart: unless-stopped
+  #   environment:
+  #     DATABASE_URL: postgresql://vertexsalud:${SALUD_DB_PASSWORD}@db:5432/vertexsalud
+  #   depends_on: [db]
+
+volumes:
+  caddy_data:
+  caddy_config:
+  pgdata:
+  traccar_data:
+  traccar_logs:

@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import AdminPanel from './components/Admin/AdminPanel';
+import SharedLocation from './pages/SharedLocation';
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -28,6 +29,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/ver/:token" element={<SharedLocation />} />
       <Route
         path="/"
         element={

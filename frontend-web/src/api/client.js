@@ -138,3 +138,10 @@ export const alertsApi = {
   list: (soloNoLeidas = false) => api.get(`/alerts?solo_no_leidas=${soloNoLeidas}`),
   markRead: (id) => api.post(`/alerts/${id}/read`),
 };
+
+export const shareApi = {
+  create: (tipo, targetId, horas = 24) => api.post('/share', { tipo, target_id: targetId, horas }),
+  list: () => api.get('/share/me'),
+  revoke: (id) => api.delete(`/share/${id}`),
+  getPublic: (token) => api.get(`/share/${token}`),
+};

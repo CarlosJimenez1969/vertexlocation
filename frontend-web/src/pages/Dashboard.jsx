@@ -7,6 +7,7 @@ import ActivityChart from '../components/ActivityChart';
 import MascotasPanel from '../components/Mascotas/MascotasPanel';
 import VehiculosPanel from '../components/Vehiculos/VehiculosPanel';
 import DispositivosPanel from '../components/Dispositivos/DispositivosPanel';
+import CompartirUbicacion from '../components/Compartir/CompartirUbicacion';
 import { useRealtime } from '../hooks/useRealtime';
 import {
   petsApi, positionsApi, geofencesApi, moodApi, alertsApi,
@@ -120,9 +121,9 @@ export default function Dashboard() {
                   : 'Esperando señal del collar C059…'}
               </p>
             </div>
-            <span className="text-xs px-3 py-1 rounded-full border border-vx-border text-vx-muted">
-              Traccar · puerto 5015 (JT808)
-            </span>
+            {selectedPet && (
+              <CompartirUbicacion tipo="mascota" targetId={selectedPet.id} disabled={!selectedPet.dispositivo_id} />
+            )}
           </div>
           <div className="flex-1 min-h-0">
             <PetMap

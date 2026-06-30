@@ -1,0 +1,15 @@
+# /opt/vertexjd/Caddyfile — HTTPS automático (Let's Encrypt) por subdominio.
+# Cloudflare al frente: poner SSL/TLS en "Full (strict)".
+
+location.vertexjd.com {
+    reverse_proxy vertexlocation:8000
+}
+
+traccar.vertexjd.com {
+    reverse_proxy traccar:8082
+}
+
+# Cuando migremos VertexSalud:
+# salud.vertexjd.com {
+#     reverse_proxy vertexsalud:8000
+# }
